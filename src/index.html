@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Unconstrained Layout</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .node {
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: .8;
+        }
+
+    </style>
+    <script src="bower_components/d3/d3.min.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/webcola/WebCola/cola.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="call.js"></script>
+</head>
+<body>
+<div class="row">
+    <div class="col-md-3">
+        <form action="#" method="post" class="form-generate-nodes">
+            <div class="form-group">
+                <label for="nodes">Количество вершин</label>
+                <input type="text" class="form-control" id="nodes">
+            </div>
+            <button type="submit" class="btn btn-primary">Сгенерировать вершины</button>
+        </form>
+    </div>
+    <div class="col-md-9 adjacency_matrix">
+        <form action="#" method="post" class="form-inline form-generate-graph">
+            <div class="form-group">
+                <label>Количество вершин</label>
+            </div>
+            <div class="clearfix"></div>
+            <div class="adjacency_matrix_content">
+                <p>Не указано количество вершин</p>
+            </div>
+            <button type="submit" class="btn btn-primary">Сгенерировать граф</button>
+        </form>
+    </div>
+</div>
+<div class="area_graph"></div>
+<!--<div class="colorNodes"></div>-->
+
+</body>
+</html>
