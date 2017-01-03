@@ -14,31 +14,42 @@
     <script src="call.js"></script>
 </head>
 <body>
-<div class="row">
-    <div class="col-md-3">
-        <form action="#" method="post" class="form-generate-nodes">
-            <div class="form-group">
-                <label for="nodes">Количество вершин</label>
-                <input type="text" class="form-control" id="nodes">
-            </div>
-            <button type="submit" class="btn btn-primary">Сгенерировать вершины</button>
-        </form>
+<div class="wrapper">
+    <div class="page-header">
+        <h1>Правильная раскраска графа</h1>
     </div>
-    <div class="col-md-9 adjacency_matrix">
-        <form action="#" method="post" class="form-inline form-generate-graph">
-            <div class="form-group">
-                <label>Количество вершин</label>
-            </div>
-            <div class="clearfix"></div>
-            <div class="adjacency_matrix_content">
-                <p>Не указано количество вершин</p>
-            </div>
-            <button type="submit" class="btn btn-primary">Сгенерировать граф</button>
-        </form>
-    </div>
-</div>
-<div class="area_graph"></div>
-<!--<div class="colorNodes"></div>-->
+    <p>
+    </p>
+    <ul>
+        <li>Раскраска называется правильной, если образы любых двух смежных вершин различны.</li>
+        <li>Хроматическим числом (h) графа называется минимальное количество красок, необходимое для правильной раскраски графа.</li>
+        <li>Используем только неориентированные графы и без петель.</li>
+    </ul>
 
+    <div class="row">
+        <div class="col-md-3">
+            <form action="#" method="post" class="form-generate-nodes">
+                <div class="form-group">
+                    <label for="nodes">Количество вершин</label>
+                    <input type="text" class="form-control" id="nodes">
+                </div>
+                <button type="submit" class="btn btn-primary">Сгенерировать вершины</button>
+            </form>
+        </div>
+        <div class="col-md-9 adjacency_matrix">
+            <form action="#" method="post" class="form-inline form-generate-graph">
+                <div class="form-group">
+                    <label>Количество вершин</label>
+                </div>
+                <div class="clearfix"></div>
+                <div class="adjacency_matrix_content">
+                    <p>Не указано количество вершин</p>
+                </div>
+                <button type="submit" class="btn btn-primary">Сгенерировать граф</button>
+            </form>
+        </div>
+    </div>
+    <div class="area_graph"></div>
+</div>
 </body>
 </html>
