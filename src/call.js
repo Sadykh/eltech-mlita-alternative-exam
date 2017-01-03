@@ -88,7 +88,7 @@ $(document).ready(function () {
 
         $('.area_graph').html('');
 
-        var color = d3.scale.category20();
+        var color = d3.scale.category10();
         var svg = d3.select('body')
             .selectAll(".area_graph")
             .append('svg')
