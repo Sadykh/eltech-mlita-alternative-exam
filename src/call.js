@@ -4,70 +4,82 @@ var width = 960,
 var cola = cola.d3adaptor()
     .size([width, height]);
 
-$(document).ready(function () {
-    var graph = {
-        "nodes": [],
-        "links": []
-    };
-    var colorsLinks = {};
-    var colorsStorage = [0];
-    var usedColorsInGroup = [];
+var graph = {
+    "nodes": [],
+    "links": []
+};
 
-    var color = d3.scale.category20();
-    var svg = d3.select('body')
-        .selectAll(".area_graph")
-        .append('svg')
-        .attr("width", width)
-        .attr("height", height);
+var colorsLinks = {};           // связь вершины и номера цвета
+var colorsStorage = [0];        // все используемые цвета
+var usedColorsInGroup = [];     // использованные цвета, чтобы не было дублей
 
-
-    function generateLinks() {
-        graph.links = [];
-        $('.adjacency_matrix_content input:checked').each(function () {
-            graph.links.push({
-                "source": $(this).data('row'),
-                "target": $(this).data('col')
-            });
+/**
+ * Генерация связи вершин на основе матрицы смежности
+ */
+function generateLinks() {
+    graph.links = [];
+    $('.adjacency_matrix_content input:checked').each(function () {
+        graph.links.push({
+            "source": $(this).data('row'),
+            "target": $(this).data('col')
         });
-    }
+    });
+}
 
-    function generateNodes(count) {
-        for (var i = 0; i < count; i++)
-            graph.nodes[i] = {"name": i};
-        generateLinks();
-    }
+/**
+ * Заполнения массива на основе введенного количества вершин в форме ввода
+ * @param count
+ */
+function generateNodes(count) {
+    for (var i = 0; i < count; i++)
+        graph.nodes[i] = {"name": i};
+    generateLinks();
+}
 
-    function generateInputs(blockContent, count) {
-        for (var i = 0; i < count; i++) {
-            var content = '<div class="adjacency_matrix_block_' + i + '">';
-            content += '<span class="label label-primary">' + i + ' вершина:</span> ';
-            for (var j = 0; j < count; j++) {
-                var disable = '';
-                var uname = 'adjacency_matrix_checkbox[' + i + '][' + j + ']';
-                if (i == j) {
-                    disable = 'disabled readonly';
-                }
-                content += '<label class="checkbox-inline"><input data-row="' + i + '" data-col="' + j + '" type="checkbox" id="' + uname + '" value="1"' + disable + '> ' + j + '</label>';
+/**
+ * Генерация чекбоксов для матрицы смежности
+ * @param blockContent
+ * @param count
+ */
+function generateInputs(blockContent, count) {
+    for (var i = 0; i < count; i++) {
+        var content = '<div class="adjacency_matrix_block_' + i + '">';
+        content += '<span class="label label-primary">' + i + ' вершина:</span> ';
+        for (var j = 0; j < count; j++) {
+            var disable = '';
+            var uname = 'adjacency_matrix_checkbox[' + i + '][' + j + ']';
+            if (i == j) {
+                disable = 'disabled readonly';
             }
-            content += '</div>';
-            blockContent.append(content);
+            content += '<label class="checkbox-inline"><input data-row="' + i + '" data-col="' + j + '" type="checkbox" id="' + uname + '" value="1"' + disable + '> ' + j + '</label>';
+        }
+        content += '</div>';
+        blockContent.append(content);
+    }
+}
+
+/**
+ * Фильтрация цвета, чтобы использовался самый минимальный цвет без повторения
+ * @returns {number}
+ */
+function filterColor() {
+    var i;
+    for (i = 0; i < colorsStorage.length; i++) {
+        if (usedColorsInGroup.indexOf(colorsStorage[i]) < 0) {
+            return colorsStorage[i];
         }
     }
+    var generateColor = colorsStorage[colorsStorage.length - 1] + 1;
+    colorsStorage.push(generateColor);
+    return generateColor;
 
-    function filterColor() {
-        var i;
-        for (i = 0; i < colorsStorage.length; i++) {
-            if (usedColorsInGroup.indexOf(colorsStorage[i]) < 0) {
-                return colorsStorage[i];
-            }
-        }
-        var generateColor = colorsStorage[colorsStorage.length - 1] + 1;
-        colorsStorage.push(generateColor);
-        return generateColor;
+}
 
-    }
+$(document).ready(function () {
 
-
+    /**
+     * Генерация визуальной части графа
+     */
     function generateGraph() {
         $('.area_graph svg').html('');
 
@@ -113,6 +125,9 @@ $(document).ready(function () {
             return 0;
         });
 
+        /**
+         * Собственно, обход графа и назначение цвета
+         */
         for (i = 0; i < sortList.length; i++) {
             usedColorsInGroup = [];
             for (var j in links[sortList[i][0]]) {
@@ -123,7 +138,6 @@ $(document).ready(function () {
             }
             colorsLinks[sortList[i][0]] = filterColor();
         }
-
 
         var node = svg.selectAll(".node")
             .data(graph.nodes)
@@ -182,10 +196,25 @@ $(document).ready(function () {
         });
     }
 
+    var color = d3.scale.category20();
+    var svg = d3.select('body')
+        .selectAll(".area_graph")
+        .append('svg')
+        .attr("width", width)
+        .attr("height", height);
+
+    /**
+     * Реакция на кнопку "сгенерировать граф"
+     */
     $(document).on('submit', 'form.form-generate-graph', function (e) {
         generateGraph();
+        $(this).find('button').removeClass('btn-primary').addClass('btn-success');
         e.preventDefault();
     });
+
+    /**
+     * Реакция на кнопку "сгенерировать вершины"
+     */
     $(document).on('submit', 'form.form-generate-nodes', function (e) {
         var count = $(this).find('#nodes').val();
         var blockContent = $('.adjacency_matrix_content');
@@ -194,14 +223,27 @@ $(document).ready(function () {
             blockContent.html('');
             generateInputs(blockContent, count);
         }
+        $(this).find('button').removeClass('btn-primary').addClass('btn-success');
         e.preventDefault();
     });
 
+    /**
+     * Реакция на нажатие чекбоксов.
+     * Чтобы направления графов были в обе стороны - так проще обрабатывать.
+     */
     $(document).on('change', '.adjacency_matrix_content input[type=checkbox]', function (e) {
         var row = $(this).data('row');
         var col = $(this).data('col');
         $('input[data-col="' + row + '"][data-row="' + col + '"]').prop("checked", this.checked);
+        $('.adjacency_matrix button').removeClass('btn-success').addClass('btn-primary');
         generateLinks();
+    });
+
+    /**
+     * Реакция кнопки на изменение количества вершин
+     */
+    $(document).on('change', '.form-generate-nodes #nodes', function (e) {
+        $(this).parent().parent().find('button').removeClass('btn-success').addClass('btn-primary');
     });
 
 });
