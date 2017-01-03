@@ -218,12 +218,16 @@ $(document).ready(function () {
     $(document).on('submit', 'form.form-generate-nodes', function (e) {
         var count = $(this).find('#nodes').val();
         var blockContent = $('.adjacency_matrix_content');
-        if (count > 0) {
+        if (count > 0 && count <= 20) {
             generateNodes(count);
             blockContent.html('');
             generateInputs(blockContent, count);
+            $(this).find('.alert').remove();
+            $(this).find('button').removeClass('btn-primary').addClass('btn-success');
+        } else {
+            var errorInfo = '<div class="alert alert-danger" role="alert">Количество должно быть от 0 до 20</div>';
+            $(this).find('.form-group').after(errorInfo);
         }
-        $(this).find('button').removeClass('btn-primary').addClass('btn-success');
         e.preventDefault();
     });
 

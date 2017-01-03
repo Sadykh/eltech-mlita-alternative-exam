@@ -24,6 +24,7 @@
         <li>Раскраска называется правильной, если образы любых двух смежных вершин различны.</li>
         <li>Хроматическим числом (h) графа называется минимальное количество красок, необходимое для правильной раскраски графа.</li>
         <li>Используем только неориентированные графы и без петель.</li>
+        <li>Количество вершин должно быть строго от 0 до 20 (включительно). Данное ограчение введено для того, чтобы пользователи не повесили свой браузер. А также, визуально больше 20 элементов смотрится не очень информативно.</li>
     </ul>
 
     <div class="row">
@@ -33,13 +34,15 @@
                     <label for="nodes">Количество вершин</label>
                     <input type="text" class="form-control" id="nodes">
                 </div>
+
                 <button type="submit" class="btn btn-primary">Сгенерировать вершины</button>
+
             </form>
         </div>
         <div class="col-md-9 adjacency_matrix">
             <form action="#" method="post" class="form-inline form-generate-graph">
                 <div class="form-group">
-                    <label>Количество вершин</label>
+                    <label>Матрица смежности</label>
                 </div>
                 <div class="clearfix"></div>
                 <div class="adjacency_matrix_content">
@@ -49,6 +52,7 @@
             </form>
         </div>
     </div>
+    <h3 class="text-center">Визуальное отображение графа</h3>
     <div class="area_graph"></div>
 </div>
 </body>
