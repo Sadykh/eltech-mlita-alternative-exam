@@ -9,6 +9,10 @@ $(document).ready(function () {
         "nodes": [],
         "links": []
     };
+    var colorsLinks = {};
+    var colorsStorage = [0];
+    var usedColorsInGroup = [];
+
     var color = d3.scale.category20();
     var svg = d3.select('body')
         .selectAll(".area_graph")
@@ -50,9 +54,23 @@ $(document).ready(function () {
         }
     }
 
+    function filterColor() {
+        var i;
+        for (i = 0; i < colorsStorage.length; i++) {
+            if (usedColorsInGroup.indexOf(colorsStorage[i]) < 0) {
+                return colorsStorage[i];
+            }
+        }
+        var generateColor = colorsStorage[colorsStorage.length - 1] + 1;
+        colorsStorage.push(generateColor);
+        return generateColor;
+
+    }
+
 
     function generateGraph() {
         $('.area_graph svg').html('');
+
         cola
             .nodes(graph.nodes)
             .links(graph.links)
@@ -65,7 +83,8 @@ $(document).ready(function () {
             .attr("class", "link");
 
         /**
-         *
+         * Объекты с массивами.
+         * Вершина => массив вершин, с которыми соединена текущая вершина
          * @type {{}}
          */
         var links = {};
@@ -76,21 +95,34 @@ $(document).ready(function () {
             }
             links[node].push(value.source.index);
         });
-        console.log(links);
 
+        /**
+         * Массив.
+         * Сортируем вершины по мощности.
+         * В массиве ["id вершины", "количество связей"]
+         */
         var sortList = [];
         for (var i in links) {
             sortList.push([i, links[i].length]);
         }
         sortList.sort(function (a, b) {
-            if (a[1] < b[1]) {
+            if (a[1] < b[1])
                 return 1;
-            }
-            if (a[1] > b[1]) {
+            if (a[1] > b[1])
                 return -1;
-            }
             return 0;
         });
+
+        for (i = 0; i < sortList.length; i++) {
+            usedColorsInGroup = [];
+            for (var j in links[sortList[i][0]]) {
+                var node_id = links[sortList[i][0]][j];
+                if (node_id in colorsLinks) {
+                    usedColorsInGroup.push(colorsLinks[node_id]);
+                }
+            }
+            colorsLinks[sortList[i][0]] = filterColor();
+        }
 
 
         var node = svg.selectAll(".node")
@@ -99,7 +131,7 @@ $(document).ready(function () {
             .attr("class", "node")
             .attr("r", 20)
             .style("fill", function (d) {
-                return color(d.index);
+                return color(colorsLinks[d.index]);
             })
             .call(cola.drag);
 
@@ -140,7 +172,7 @@ $(document).ready(function () {
                 });
 
             label.attr("x", function (d) {
-                    return d.x;
+                    return d.x - 3;
                 })
                 .attr("y", function (d) {
                     var h = this.getBBox().height;

@@ -168,3 +168,16 @@ blockquote:after {
 .adjacency_matrix_content {
     margin-bottom: 20px;
 }
+svg {
+    font: 22px serif;
+}
+.node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: .8;
+}
+
