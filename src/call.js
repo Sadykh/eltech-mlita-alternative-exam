@@ -86,7 +86,47 @@ $(document).ready(function () {
         usedColorsInGroup = [];
         generateNodes($('form.form-generate-nodes #nodes').val());
 
-        $('.area_graph svg').html('');
+        $('.area_graph').html('');
+
+        var color = d3.scale.category20();
+        var svg = d3.select('body')
+            .selectAll(".area_graph")
+            .append('svg')
+            .attr("width", width)
+            .attr("height", height);
+
+        var g = svg.append("g");
+
+        // then, create the zoom behvavior
+        var zoom = d3.behavior.zoom()
+            // only scale up, e.g. between 1x and 50x
+            .scaleExtent([-8, 50])
+            .on("zoom", function() {
+                // the "zoom" event populates d3.event with an object that has
+                // a "translate" property (a 2-element Array in the form [x, y])
+                // and a numeric "scale" property
+                var e = d3.event,
+                // now, constrain the x and y components of the translation by the
+                // dimensions of the viewport
+                    tx = Math.min(0, Math.max(e.translate[0], width - width * e.scale)),
+                    ty = Math.min(0, Math.max(e.translate[1], height - height * e.scale));
+                // then, update the zoom behavior's internal translation, so that
+                // it knows how to properly manipulate it on the next movement
+                zoom.translate([tx, ty]);
+                // and finally, update the <g> element's transform attribute with the
+                // correct translation and scale (in reverse order)
+                g.attr("transform", [
+                    "translate(" + [tx, ty] + ")",
+                    "scale(" + e.scale + ")"
+                ].join(" "));
+            });
+
+        // then, call the zoom behavior on the svg element, which will add
+        // all of the necessary mouse and touch event handlers.
+        // remember that if you call this on the <g> element, the even handlers
+        // will only trigger when the mouse or touch cursor intersects with the
+        // <g> elements' children!
+        svg.call(zoom);
 
         cola
             .nodes(graph.nodes)
@@ -94,7 +134,7 @@ $(document).ready(function () {
             .jaccardLinkLengths(90, 5.7)
             .start(2);
 
-        var link = svg.selectAll(".link")
+        var link = g.selectAll(".link")
             .data(graph.links)
             .enter().append("line")
             .attr("class", "link");
@@ -174,7 +214,7 @@ $(document).ready(function () {
 
         processNodes();
 
-        var node = svg.selectAll(".node")
+        var node = g.selectAll(".node")
             .data(graph.nodes)
             .enter().append("circle")
             .attr("class", "node")
@@ -184,7 +224,7 @@ $(document).ready(function () {
             })
             .call(cola.drag);
 
-        var label = svg.selectAll(".label")
+        var label = g.selectAll(".label")
             .data(graph.nodes)
             .enter().append("text")
             .attr("class", "label")
@@ -229,14 +269,9 @@ $(document).ready(function () {
                 });
 
         });
+
     }
 
-    var color = d3.scale.category20();
-    var svg = d3.select('body')
-        .selectAll(".area_graph")
-        .append('svg')
-        .attr("width", width)
-        .attr("height", height);
 
     /**
      * Реакция на кнопку "сгенерировать граф"

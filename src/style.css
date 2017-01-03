@@ -74,7 +74,6 @@ aside {
     width: 640px;
 }
 
-
 a {
     color: steelblue;
 }
@@ -165,9 +164,11 @@ blockquote:after {
 .adjacency_matrix_content {
     margin-bottom: 20px;
 }
+
 svg {
     font: 22px serif;
 }
+
 .node {
     stroke: #fff;
     cursor: pointer;
@@ -183,4 +184,6 @@ svg {
     border-radius: 20px;
     border: 1px solid #cecece;
     margin: 20px 0;
+    width: 960px;
+    height: 540px;
 }
