@@ -77,7 +77,6 @@ function filterColor() {
 }
 
 $(document).ready(function () {
-
     /**
      * Генерация визуальной части графа
      */
@@ -114,6 +113,7 @@ $(document).ready(function () {
             links[node].push(value.source.index);
         });
 
+
         /**
          * Массив.
          * Сортируем вершины по мощности.
@@ -132,18 +132,47 @@ $(document).ready(function () {
         });
 
         /**
-         * Собственно, обход графа и назначение цвета
+         * Обработка скопившейся очереди вершин.
+         * Такое бывает, когда мы смотрим одну вершину, а её ребра не обработаны. Чтобы следующими именно ребро обрабатывались.
+         * @param queue
          */
-        for (i = 0; i < sortList.length; i++) {
-            usedColorsInGroup = [];
-            for (var j in links[sortList[i][0]]) {
-                var node_id = links[sortList[i][0]][j];
-                if (node_id in colorsLinks) {
-                    usedColorsInGroup.push(colorsLinks[node_id]);
-                }
+        function processQueue(queue) {
+            for (var i = 0; i < queue.length; i++) {
+                processSingleNode(queue[i]);
             }
-            colorsLinks[sortList[i][0]] = filterColor();
         }
+
+        /**
+         * Обработка одной вершины
+         * @param node
+         */
+        function processSingleNode(node) {
+            var queueProcess = [];
+            if (colorsLinks[node] === undefined) {
+                usedColorsInGroup = [];
+                for (var j in links[node]) {
+                    var node_id = links[node][j];
+                    if (node_id in colorsLinks) {
+                        usedColorsInGroup.push(colorsLinks[node_id]);
+                    } else {
+                        queueProcess.push(node_id);
+                    }
+                }
+                colorsLinks[node] = filterColor();
+                processQueue(queueProcess);
+            }
+        }
+
+        /**
+         * Обход графа. Обходит все вершины, по пути смотрит - если в процессе уже вершина обработана, то пропускает.
+         */
+        function processNodes() {
+            for (var i = 0; i < sortList.length; i++) {
+                processSingleNode(sortList[i][0]);
+            }
+        }
+
+        processNodes();
 
         var node = svg.selectAll(".node")
             .data(graph.nodes)
