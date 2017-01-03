@@ -31,6 +31,7 @@ function generateLinks() {
  * @param count
  */
 function generateNodes(count) {
+    graph.nodes = [];
     for (var i = 0; i < count; i++)
         graph.nodes[i] = {"name": i};
     generateLinks();
@@ -81,6 +82,11 @@ $(document).ready(function () {
      * Генерация визуальной части графа
      */
     function generateGraph() {
+        colorsLinks = {};
+        colorsStorage = [0];
+        usedColorsInGroup = [];
+        generateNodes($('form.form-generate-nodes #nodes').val());
+
         $('.area_graph svg').html('');
 
         cola
@@ -219,7 +225,6 @@ $(document).ready(function () {
         var count = $(this).find('#nodes').val();
         var blockContent = $('.adjacency_matrix_content');
         if (count > 0 && count <= 20) {
-            generateNodes(count);
             blockContent.html('');
             generateInputs(blockContent, count);
             $(this).find('.alert').remove();
