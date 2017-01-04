@@ -328,10 +328,10 @@ $(document).ready(function () {
     $(document).on('submit', 'form.form-generate-nodes', function (e) {
         var count = $(this).find('#nodes').val();
         var blockContent = $('.adjacency_matrix_content');
+        $(this).find('.alert').remove();
         if (count > 0 && count <= 20) {
             blockContent.html('');
             generateInputs(blockContent, count);
-            $(this).find('.alert').remove();
             $(this).find('button').removeClass('btn-primary').addClass('btn-success');
         } else {
             var errorInfo = '<div class="alert alert-danger" role="alert">Количество должно быть от 0 до 20</div>';
