@@ -187,3 +187,9 @@ svg {
     width: 960px;
     height: 540px;
 }
+
+.js-color-update {
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+}

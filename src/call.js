@@ -59,24 +59,37 @@ function generateInputs(blockContent, count) {
     }
 }
 
-/**
- * Фильтрация цвета, чтобы использовался самый минимальный цвет без повторения
- * @returns {number}
- */
-function filterColor() {
-    var i;
-    for (i = 0; i < colorsStorage.length; i++) {
-        if (usedColorsInGroup.indexOf(colorsStorage[i]) < 0) {
-            return colorsStorage[i];
-        }
-    }
-    var generateColor = colorsStorage[colorsStorage.length - 1] + 1;
-    colorsStorage.push(generateColor);
-    return generateColor;
 
-}
 
 $(document).ready(function () {
+    var logPaint = $('.logs_graph_paints ol');
+
+    /**
+     * Фильтрация цвета, чтобы использовался самый минимальный цвет без повторения
+     * @returns {number}
+     */
+    function filterColor() {
+        var i;
+        logPaint.append('<li>Доступные цвета для покраски: ' + colorsStorage + '</li>');
+        if (usedColorsInGroup.length) {
+            logPaint.append('<li>Следующие цвета нельзя использовать, так как соседние вершины уже имеют эти цвета: ' + usedColorsInGroup + '</li>');
+        }
+        for (i = 0; i < colorsStorage.length; i++) {
+            logPaint.append('<li>Проверка цвета <span class="js-color-update" data-color="' + i +'">' + i + '</span> в списке использованных</li>');
+            if (usedColorsInGroup.indexOf(colorsStorage[i]) < 0) {
+                logPaint.append('<li>Цвет <span class="js-color-update" data-color="' + i +'">' + i + '</span> не использован</li>');
+                return colorsStorage[i];
+            }
+            logPaint.append('<li>Цвет <span class="js-color-update" data-color="' + i +'">' + i + '</span> использован</li>');
+        }
+        var generateColor = colorsStorage[colorsStorage.length - 1] + 1;
+        colorsStorage.push(generateColor);
+        logPaint.append('<li>Свободных цветов не нашлось, добавлен новый цвет: <span class="js-color-update" data-color="' + generateColor +'">' + generateColor + '</span></li>');
+        return generateColor;
+
+    }
+
+
     /**
      * Генерация визуальной части графа
      */
@@ -153,6 +166,12 @@ $(document).ready(function () {
             links[node].push(value.source.index);
         });
 
+        $('.logs_graph_sorting_before ol li').remove();
+        $.each(links, function(index, value) {
+            $('.logs_graph_sorting_before ol').append('<li>Вершина #' + index + ', ребра: ' + value);
+        });
+
+
 
         /**
          * Массив.
@@ -171,6 +190,14 @@ $(document).ready(function () {
             return 0;
         });
 
+        // Вывод отсортированного списка
+        $('.logs_graph_sorting_after ol li').remove();
+        $.each(sortList, function(index, value) {
+            $('.logs_graph_sorting_after ol').append('<li>Вершина #' + value[0] + ', количество ребер: ' + value[1]);
+        });
+
+        $('.logs_graph_paints li').remove();
+
         /**
          * Обработка скопившейся очереди вершин.
          * Такое бывает, когда мы смотрим одну вершину, а её ребра не обработаны. Чтобы следующими именно ребро обрабатывались.
@@ -188,18 +215,25 @@ $(document).ready(function () {
          */
         function processSingleNode(node) {
             var queueProcess = [];
+            logPaint.append('<li>Просмотр вершины #' + node + '</li>');
             if (colorsLinks[node] === undefined) {
                 usedColorsInGroup = [];
+                logPaint.append('<li>Стек использованных цветов очищен</li>');
                 for (var j in links[node]) {
                     var node_id = links[node][j];
                     if (node_id in colorsLinks) {
+                        logPaint.append('<li>Вершина #' + node_id + ' уже имеет цвет <span class="js-color-update" data-color="' +  colorsLinks[node_id] +'">' +  colorsLinks[node_id] + '</span>, его цвет добавлен в список уже использованных.</li>');
                         usedColorsInGroup.push(colorsLinks[node_id]);
                     } else {
+                        logPaint.append('<li>Вершина #' + node_id + ' добавлена в очередь на покраску.</li>');
                         queueProcess.push(node_id);
                     }
                 }
                 colorsLinks[node] = filterColor();
+                logPaint.append('<li>Вершине #' + node + ' назначен цвет <span class="js-color-update" data-color="' +  colorsLinks[node] +'">' +  colorsLinks[node] + '</span></li>');
                 processQueue(queueProcess);
+            } else {
+                logPaint.append('<li>Вершина #' + node + ' уже имеет цвет ' + colorsLinks[node] + '</li>');
             }
         }
 
@@ -270,7 +304,13 @@ $(document).ready(function () {
 
         });
 
+        $(".js-color-update").each(function (index, element) {
+            var colorId = $(this).data('color');
+            $(this).css({background: color(colorId)});
+        });
     }
+
+
 
 
     /**
