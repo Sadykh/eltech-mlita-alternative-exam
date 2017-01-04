@@ -62,7 +62,7 @@ function generateInputs(blockContent, count) {
 
 
 $(document).ready(function () {
-    var logPaint = $('.logs_graph_paints ol');
+    var logPaint = $('.logs_graph_paints ol');  // куда мы записываем логи по записи
 
     /**
      * Фильтрация цвета, чтобы использовался самый минимальный цвет без повторения
@@ -89,7 +89,6 @@ $(document).ready(function () {
 
     }
 
-
     /**
      * Генерация визуальной части графа
      */
@@ -112,33 +111,18 @@ $(document).ready(function () {
 
         // then, create the zoom behvavior
         var zoom = d3.behavior.zoom()
-            // only scale up, e.g. between 1x and 50x
             .scaleExtent([-8, 50])
             .on("zoom", function() {
-                // the "zoom" event populates d3.event with an object that has
-                // a "translate" property (a 2-element Array in the form [x, y])
-                // and a numeric "scale" property
                 var e = d3.event,
-                // now, constrain the x and y components of the translation by the
-                // dimensions of the viewport
                     tx = Math.min(0, Math.max(e.translate[0], width - width * e.scale)),
                     ty = Math.min(0, Math.max(e.translate[1], height - height * e.scale));
-                // then, update the zoom behavior's internal translation, so that
-                // it knows how to properly manipulate it on the next movement
                 zoom.translate([tx, ty]);
-                // and finally, update the <g> element's transform attribute with the
-                // correct translation and scale (in reverse order)
                 g.attr("transform", [
                     "translate(" + [tx, ty] + ")",
                     "scale(" + e.scale + ")"
                 ].join(" "));
             });
 
-        // then, call the zoom behavior on the svg element, which will add
-        // all of the necessary mouse and touch event handlers.
-        // remember that if you call this on the <g> element, the even handlers
-        // will only trigger when the mouse or touch cursor intersects with the
-        // <g> elements' children!
         svg.call(zoom);
 
         cola
@@ -151,6 +135,7 @@ $(document).ready(function () {
             .data(graph.links)
             .enter().append("line")
             .attr("class", "link");
+
 
         /**
          * Объекты с массивами.
@@ -166,10 +151,71 @@ $(document).ready(function () {
             links[node].push(value.source.index);
         });
 
+        var node = g.selectAll(".node")
+            .data(graph.nodes)
+            .enter().append("circle")
+            .attr("class", "node")
+            .attr("r", 20)
+            .attr("data-number", function(d) {
+                return d.index;
+            })
+            //.style("fill", function (d) {
+            //    return color(colorsLinks[d.index]);
+            //})
+            .call(cola.drag);
+
+        var label = g.selectAll(".label")
+            .data(graph.nodes)
+            .enter().append("text")
+            .attr("class", "label")
+            .text(function (d) {
+                return d.name;
+            })
+            .call(cola.drag);
+
+
+        node.append("title")
+            .text(function (d) {
+                return d.name;
+            });
+
+        cola.on("tick", function () {
+            link.attr("x1", function (d) {
+                    return d.source.x;
+                })
+                .attr("y1", function (d) {
+                    return d.source.y;
+                })
+                .attr("x2", function (d) {
+                    return d.target.x;
+                })
+                .attr("y2", function (d) {
+                    return d.target.y;
+                });
+
+            node.attr("cx", function (d) {
+                    return d.x;
+                })
+                .attr("cy", function (d) {
+                    return d.y;
+                });
+
+            label.attr("x", function (d) {
+                    return d.x - 3;
+                })
+                .attr("y", function (d) {
+                    var h = this.getBBox().height;
+                    return d.y + h / 4;
+                });
+
+        });
+
         $('.logs_graph_sorting_before ol li').remove();
         $.each(links, function(index, value) {
             $('.logs_graph_sorting_before ol').append('<li>Вершина #' + index + ', ребра: ' + value);
         });
+
+
 
 
 
@@ -248,60 +294,13 @@ $(document).ready(function () {
 
         processNodes();
 
-        var node = g.selectAll(".node")
-            .data(graph.nodes)
-            .enter().append("circle")
-            .attr("class", "node")
-            .attr("r", 20)
-            .style("fill", function (d) {
-                return color(colorsLinks[d.index]);
-            })
-            .call(cola.drag);
-
-        var label = g.selectAll(".label")
-            .data(graph.nodes)
-            .enter().append("text")
-            .attr("class", "label")
-            .text(function (d) {
-                return d.name;
-            })
-            .call(cola.drag);
 
 
-        node.append("title")
-            .text(function (d) {
-                return d.name;
-            });
 
-        cola.on("tick", function () {
-            link.attr("x1", function (d) {
-                    return d.source.x;
-                })
-                .attr("y1", function (d) {
-                    return d.source.y;
-                })
-                .attr("x2", function (d) {
-                    return d.target.x;
-                })
-                .attr("y2", function (d) {
-                    return d.target.y;
-                });
 
-            node.attr("cx", function (d) {
-                    return d.x;
-                })
-                .attr("cy", function (d) {
-                    return d.y;
-                });
-
-            label.attr("x", function (d) {
-                    return d.x - 3;
-                })
-                .attr("y", function (d) {
-                    var h = this.getBBox().height;
-                    return d.y + h / 4;
-                });
-
+        $(".area_graph .node").each(function (index, element) {
+            var number = $(this).data('number');
+            $(this).css({fill: color(colorsLinks[number])});
         });
 
         $(".js-color-update").each(function (index, element) {
