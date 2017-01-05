@@ -228,7 +228,7 @@ $(document).ready(function () {
 
         $('.logs_graph_sorting_before ol li').remove();
         $.each(links, function(index, value) {
-            $('.logs_graph_sorting_before ol').append('<li>Вершина #' + index + ', ребра: ' + value);
+            $('.logs_graph_sorting_before ol').append('<li>Вершина #' + index + ', связанные вершины: ' + value);
         });
 
 
@@ -257,7 +257,7 @@ $(document).ready(function () {
         $('.logs_graph_sorting').slideDown();
         $('.logs_graph_sorting_after ol li').remove();
         $.each(sortList, function(index, value) {
-            $('.logs_graph_sorting_after ol').append('<li>Вершина #' + value[0] + ', количество ребер: ' + value[1]);
+            $('.logs_graph_sorting_after ol').append('<li>Вершина #' + value[0] + ', количество связей: ' + value[1]);
         });
 
         $('.logs_graph_paints li').remove();
@@ -265,7 +265,7 @@ $(document).ready(function () {
 
         /**
          * Обработка скопившейся очереди вершин.
-         * Такое бывает, когда мы смотрим одну вершину, а её ребра не обработаны. Чтобы следующими именно ребро обрабатывались.
+         * Такое бывает, когда мы смотрим одну вершину, а её вершины не обработаны. Чтобы следующими именно вершины обрабатывались.
          * @param queue
          */
         function processQueue(queue) {
