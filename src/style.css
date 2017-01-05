@@ -218,3 +218,8 @@ svg {
 .result_calculate_colors_list {
     display: none;
 }
+
+.tabpanel img {
+    width: 100%;
+    max-width: 100%;
+}
