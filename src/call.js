@@ -64,6 +64,21 @@ function generateInputs(blockContent, count) {
 $(document).ready(function () {
     var logPaint = $('.logs_graph_paints ol');  // куда мы записываем логи по записи
 
+    $('.link-slow-scroll a[href*="#"]:not([href="#"])').click(function() {
+        if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
+            var target = $(this.hash);
+            $('.link-slow-scroll .active').removeClass('active');
+            $(this).parent().addClass('active');
+            target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+            if (target.length) {
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 80
+                }, 1000);
+                return false;
+            }
+        }
+    });
+
     /**
      * Фильтрация цвета, чтобы использовался самый минимальный цвет без повторения
      * @returns {number}
@@ -210,6 +225,7 @@ $(document).ready(function () {
 
         });
 
+
         $('.logs_graph_sorting_before ol li').remove();
         $.each(links, function(index, value) {
             $('.logs_graph_sorting_before ol').append('<li>Вершина #' + index + ', ребра: ' + value);
@@ -237,12 +253,15 @@ $(document).ready(function () {
         });
 
         // Вывод отсортированного списка
+        $('.logs_graph .empty_log').slideUp();
+        $('.logs_graph_sorting').slideDown();
         $('.logs_graph_sorting_after ol li').remove();
         $.each(sortList, function(index, value) {
             $('.logs_graph_sorting_after ol').append('<li>Вершина #' + value[0] + ', количество ребер: ' + value[1]);
         });
 
         $('.logs_graph_paints li').remove();
+        $('.logs_graph_paints').slideDown();
 
         /**
          * Обработка скопившейся очереди вершин.
@@ -296,7 +315,12 @@ $(document).ready(function () {
 
 
 
-
+        $('.result_calculate_colors_list').slideDown();
+        $('.result_calculate_colors li').remove();
+        for (var i = 0; i < colorsStorage.length; i++) {
+            $('.result_calculate_colors').append('<li><span class="js-color-update" data-color="' + i +'">' + i + '</span></li>');
+        }
+        $('.result_calculate_colors_count').text(colorsStorage.length);
 
         $(".area_graph .node").each(function (index, element) {
             var number = $(this).data('number');
@@ -332,6 +356,7 @@ $(document).ready(function () {
             blockContent.html('');
             generateInputs(blockContent, count);
             $(this).find('button').removeClass('btn-primary').addClass('btn-success');
+            $('.form-generate-graph button').removeAttr('disabled');
         } else {
             var errorInfo = '<div class="alert alert-danger" role="alert">Количество должно быть от 0 до 20</div>';
             $(this).find('.form-group').after(errorInfo);
