@@ -315,6 +315,7 @@ $(document).ready(function () {
 
 
 
+        $('.result_calculate_none').slideUp();
         $('.result_calculate_colors_list').slideDown();
         $('.result_calculate_colors li').remove();
         for (var i = 0; i < colorsStorage.length; i++) {
