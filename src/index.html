@@ -125,7 +125,7 @@
                 <div class="form-group" style="margin-bottom: 10px">
                     <label for="algo_generate" style="display: block">Алгоритм</label>
                     <select id="algo_generate" class="form-control">
-                        <option value="0">Безымяный алгоритм</option>
+                        <option value="0">Безымянный алгоритм</option>
                         <option value="1">Алгоритм перебора с возвратом</option>
                     </select>
                 </div>
@@ -212,8 +212,8 @@
     <div class="clearfix"></div>
     <div class="row">
 
-        <div class="col-md-12">
-            <h3>Алгоритм</h3>
+        <div class="col-md-12" style="border-radius: 50px; border: 1px dashed #cecece;">
+            <h3>Безымянный алгоритм</h3>
 
             <p>У нас имеется три массива:</p>
             <ul>
@@ -232,7 +232,7 @@
                     массив <span class="label label-warning">USED_COLORS</span></li>
                 <li>После этого проходим по массиву <span class="label label-info">COLORS</span>, начиная с 0.
                     Сравниванием, если цвет в <span class="label label-warning">USED_COLORS</span>, если нет - выбираем
-                    его. Если есть, то идем дальше i++
+                    его. Если есть, то смотрим следующие цвета в массиве <span class="label label-info">COLORS</span>
                 </li>
                 <li>Если массив <span class="label label-info">COLORS</span> закончился, то к последнему цвету добавляем
                     единицу и сохраняем в массив <span class="label label-success">RESULT</span> в виде массива [ID
@@ -280,7 +280,14 @@
             </p>
         </div>
 
-        <div class="col-md-12">
+        <div class="col-md-12" style="border-radius: 50px; border: 1px dashed #cecece; margin-top: 20px" >
+            <h3>Алгоритм перебора с возвратом</h3>
+
+            <p>Первая вершина окрашивается в цвет 1. Затем список вершин просматривается сверху вниз (по невозрастанию степеней) и в цвет 1 окрашивается всякая вершина, которая не смежна с другой, уже окрашенной в этот цвет. Потом возвращаемся к первой в списке неокрашенной вершине, окрашиваем ее в цвет 2 и снова просматриваем список вершин сверху вниз, окрашивая в цвет 2 любую неокрашенную вершину, которая не соединена ребром с другой, уже окрашенной в цвет 2 вершиной. Аналогично действуем с цветами 3, 4 и т. д., пока не будут окрашены все вершины. Число использованных цветов будет тогда приближенным значением хроматического числа графа.
+            <p><span class="label label-info"><a href="http://rain.ifmo.ru/cat/view.php/theory/graph-coloring-layout/coloring-2004">Источник</a></span></p>
+        </div>
+
+        <div class="col-md-12" style="display:none;">
             <h3>Пример работы алгоритма</h3>
             <div>
                 <p>Ниже показано, как пошагово работает алгоритм.</p>
