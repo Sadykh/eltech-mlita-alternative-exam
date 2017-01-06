@@ -117,12 +117,29 @@
         <div class="col-md-12"><h3><i class="glyphicon glyphicon-wrench"></i> Конфигурация</h3></div>
         <div class="col-md-3">
             <form action="#" method="post" class="form-generate-nodes">
-                <div class="form-group">
+                <div class="form-group form-generate-nodes-count">
                     <label for="nodes">Количество вершин</label>
                     <input type="text" class="form-control" id="nodes">
                 </div>
-
-                <button type="submit" class="btn btn-primary">Сгенерировать вершины</button>
+                <div class="clearfix"></div>
+                <div class="form-group" style="margin-bottom: 10px">
+                    <label for="algo_generate" style="display: block">Алгоритм</label>
+                    <select id="algo_generate" class="form-control">
+                        <option value="0">Безымяный алгоритм</option>
+                        <option value="1">Алгоритм перебора с возвратом</option>
+                    </select>
+                </div>
+                <div class="clearfix"></div>
+                <div class="form-group" style="margin-bottom: 10px">
+                    <label for="color_step" style="display: block">Покрасить...</label>
+                    <select id="color_step" class="form-control">
+                        <option value="0">Сразу</option>
+                        <option value="1">По одному цвету</option>
+                    </select>
+                </div>
+                <span class="badge badge-primary" style="margin-bottom: 10px">только для алгоритма с возвратом</span>
+                <div class="clearfix"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Сгенерировать вершины</button>
 
             </form>
         </div>
@@ -135,7 +152,9 @@
                 <div class="adjacency_matrix_content">
                     <p>Не указано количество вершин</p>
                 </div>
-                <button type="submit" class="btn btn-primary" disabled>Сгенерировать граф</button>
+
+
+                <button type="submit" class="btn btn-primary" disabled style="width: 100%">Сгенерировать граф</button>
             </form>
         </div>
         <div class="col-md-3">
@@ -161,6 +180,7 @@
 
     <p class="text-center"><span class="glyphicon glyphicon-zoom-in"></span> Граф можно масштабировать прокруткой колеса
         мышки.</p>
+    <div class="step-color text-center"><a href="#" class="btn btn-primary">Следующий цвет</a></div>
 
     <div class="area_graph">
         <p class="empty"><span class="glyphicon glyphicon-hand-up"></span>Сначала нужно сгенерировать граф. Конфигуратор

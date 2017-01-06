@@ -9,9 +9,15 @@ var graph = {
     "links": []
 };
 
-var colorsLinks = {};           // связь вершины и номера цвета
-var colorsStorage = [0];        // все используемые цвета
-var usedColorsInGroup = [];     // использованные цвета, чтобы не было дублей
+var colorsLinks = {};                                           // связь вершины и номера цвета
+var colorsStorage = [0];                                        // все используемые цвета
+var usedColorsInGroup = [];                                     // использованные цвета, чтобы не было дублей
+var alg;                                                        // какой алгоритм выбран
+var stepColor;                                                   // сразу все отрисовывать или пошагово
+var stepColorCount;                                             // сколько цветов отрисовано
+var sortList = [];
+var links = {};
+var color = d3.scale.category10();
 
 /**
  * Генерация связи вершин на основе матрицы смежности
@@ -60,11 +66,10 @@ function generateInputs(blockContent, count) {
 }
 
 
-
 $(document).ready(function () {
     var logPaint = $('.logs_graph_paints ol');  // куда мы записываем логи по записи
 
-    $('.link-slow-scroll a[href*="#"]:not([href="#"])').click(function() {
+    $('.link-slow-scroll a[href*="#"]:not([href="#"])').click(function () {
         if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
             var target = $(this.hash);
             $('.link-slow-scroll .active').removeClass('active');
@@ -90,19 +95,84 @@ $(document).ready(function () {
             logPaint.append('<li>Следующие цвета нельзя использовать, так как соседние вершины уже имеют эти цвета: ' + usedColorsInGroup + '</li>');
         }
         for (i = 0; i < colorsStorage.length; i++) {
-            logPaint.append('<li>Проверка цвета <span class="js-color-update" data-color="' + i +'">' + i + '</span> в списке использованных</li>');
+            logPaint.append('<li>Проверка цвета <span class="js-color-update" data-color="' + i + '">' + i + '</span> в списке использованных</li>');
             if (usedColorsInGroup.indexOf(colorsStorage[i]) < 0) {
-                logPaint.append('<li>Цвет <span class="js-color-update" data-color="' + i +'">' + i + '</span> не использован</li>');
+                logPaint.append('<li>Цвет <span class="js-color-update" data-color="' + i + '">' + i + '</span> не использован</li>');
                 return colorsStorage[i];
             }
-            logPaint.append('<li>Цвет <span class="js-color-update" data-color="' + i +'">' + i + '</span> использован</li>');
+            logPaint.append('<li>Цвет <span class="js-color-update" data-color="' + i + '">' + i + '</span> использован</li>');
         }
         var generateColor = colorsStorage[colorsStorage.length - 1] + 1;
         colorsStorage.push(generateColor);
-        logPaint.append('<li>Свободных цветов не нашлось, добавлен новый цвет: <span class="js-color-update" data-color="' + generateColor +'">' + generateColor + '</span></li>');
+        logPaint.append('<li>Свободных цветов не нашлось, добавлен новый цвет: <span class="js-color-update" data-color="' + generateColor + '">' + generateColor + '</span></li>');
         return generateColor;
 
     }
+
+    /**
+     * Обновить все цвета
+     */
+    function updateAllColors() {
+        $(".area_graph .node").each(function (index, element) {
+            var number = $(this).data('number');
+            var colorRgb;
+            if (colorsLinks[number] == undefined) {
+                colorRgb = '#cecece';
+            } else {
+                colorRgb = color(colorsLinks[number]);
+            }
+            $(this).css({fill: colorRgb});
+        });
+
+        $(".js-color-update").each(function (index, element) {
+            var colorId = $(this).data('color');
+            $(this).css({background: color(colorId)});
+        });
+    }
+
+    /**
+     * Алогоритм перебора с возвратом
+     */
+    function processPaint() {
+        var unpainted = 1;
+        var freeColor = 1;
+        var count = 0;
+        var k = 0;
+
+        for (var i = 0; unpainted; i++) {
+            if (stepColor) {
+                i = stepColorCount;
+                $('.step-color').slideDown();
+            }
+            logPaint.append('<li>' + 'Выбрали цвет <span class="js-color-update" data-color="' + i + '">' + i + '</span></li>');
+            for (var j = 0; j < sortList.length; j++) {
+                logPaint.append('<li>' + 'Хотим покрасить вершину #' + sortList[j][0] + '</li>');
+                if (colorsLinks[sortList[j][0]] == undefined) {
+                    logPaint.append('<li>' + 'Соседние вершины: ' + links[sortList[j][0]] + '</li>');
+                    freeColor = 1;
+                    for (k = 0; k < links[sortList[j][0]].length && freeColor; k++) {
+                        logPaint.append('<li>' + 'Смотри вершину #' + links[sortList[j][0]][k] + ', у нее цвет номер <span class="js-color-update" data-color="' + colorsLinks[links[sortList[j][0]][k]] + '">' + colorsLinks[links[sortList[j][0]][k]] + '</span></li>');
+                        if (colorsLinks[links[sortList[j][0]][k]] == i) {
+                            freeColor = 0;
+                        }
+                    }
+                    if (freeColor) {
+                        logPaint.append('<li>' + 'Вершину #' + sortList[j][0] + ' красим в <span class="js-color-update" data-color="' + i + '">' + i + '</span></li>');
+                        colorsLinks[sortList[j][0]] = i;
+                        count++;
+                    }
+                } else {
+                    logPaint.append('<li>' + 'Вершина #' + sortList[j][0] + ' уже имеет цвет.' + '</li>');
+                }
+            }
+            if (stepColor || count == sortList.length) {
+                logPaint.append('<li>Количество цветов совпадает с количество вершин.</li>');
+                break;
+            }
+            colorsStorage.push(i);
+        }
+    }
+
 
     /**
      * Генерация визуальной части графа
@@ -111,11 +181,11 @@ $(document).ready(function () {
         colorsLinks = {};
         colorsStorage = [0];
         usedColorsInGroup = [];
+
         generateNodes($('form.form-generate-nodes #nodes').val());
 
         $('.area_graph').html('');
 
-        var color = d3.scale.category10();
         var svg = d3.select('body')
             .selectAll(".area_graph")
             .append('svg')
@@ -127,7 +197,7 @@ $(document).ready(function () {
         // then, create the zoom behvavior
         var zoom = d3.behavior.zoom()
             .scaleExtent([-8, 50])
-            .on("zoom", function() {
+            .on("zoom", function () {
                 var e = d3.event,
                     tx = Math.min(0, Math.max(e.translate[0], width - width * e.scale)),
                     ty = Math.min(0, Math.max(e.translate[1], height - height * e.scale));
@@ -157,7 +227,7 @@ $(document).ready(function () {
          * Вершина => массив вершин, с которыми соединена текущая вершина
          * @type {{}}
          */
-        var links = {};
+        links = {};
         $.each(graph.links, function (index, value) {
             var node = value.target.index;
             if (links[node] === undefined) {
@@ -171,7 +241,7 @@ $(document).ready(function () {
             .enter().append("circle")
             .attr("class", "node")
             .attr("r", 20)
-            .attr("data-number", function(d) {
+            .attr("data-number", function (d) {
                 return d.index;
             })
             //.style("fill", function (d) {
@@ -227,12 +297,9 @@ $(document).ready(function () {
 
 
         $('.logs_graph_sorting_before ol li').remove();
-        $.each(links, function(index, value) {
+        $.each(links, function (index, value) {
             $('.logs_graph_sorting_before ol').append('<li>Вершина #' + index + ', связанные вершины: ' + value);
         });
-
-
-
 
 
         /**
@@ -240,7 +307,7 @@ $(document).ready(function () {
          * Сортируем вершины по мощности.
          * В массиве ["id вершины", "количество связей"]
          */
-        var sortList = [];
+        sortList = [];
         for (var i in links) {
             sortList.push([i, links[i].length]);
         }
@@ -256,7 +323,7 @@ $(document).ready(function () {
         $('.logs_graph .empty_log').slideUp();
         $('.logs_graph_sorting').slideDown();
         $('.logs_graph_sorting_after ol li').remove();
-        $.each(sortList, function(index, value) {
+        $.each(sortList, function (index, value) {
             $('.logs_graph_sorting_after ol').append('<li>Вершина #' + value[0] + ', количество связей: ' + value[1]);
         });
 
@@ -287,7 +354,7 @@ $(document).ready(function () {
                 for (var j in links[node]) {
                     var node_id = links[node][j];
                     if (node_id in colorsLinks) {
-                        logPaint.append('<li>Вершина #' + node_id + ' уже имеет цвет <span class="js-color-update" data-color="' +  colorsLinks[node_id] +'">' +  colorsLinks[node_id] + '</span>, его цвет добавлен в список уже использованных.</li>');
+                        logPaint.append('<li>Вершина #' + node_id + ' уже имеет цвет <span class="js-color-update" data-color="' + colorsLinks[node_id] + '">' + colorsLinks[node_id] + '</span>, его цвет добавлен в список уже использованных.</li>');
                         usedColorsInGroup.push(colorsLinks[node_id]);
                     } else {
                         logPaint.append('<li>Вершина #' + node_id + ' добавлена в очередь на покраску.</li>');
@@ -295,7 +362,7 @@ $(document).ready(function () {
                     }
                 }
                 colorsLinks[node] = filterColor();
-                logPaint.append('<li>Вершине #' + node + ' назначен цвет <span class="js-color-update" data-color="' +  colorsLinks[node] +'">' +  colorsLinks[node] + '</span></li>');
+                logPaint.append('<li>Вершине #' + node + ' назначен цвет <span class="js-color-update" data-color="' + colorsLinks[node] + '">' + colorsLinks[node] + '</span></li>');
                 processQueue(queueProcess);
             } else {
                 logPaint.append('<li>Вершина #' + node + ' уже имеет цвет ' + colorsLinks[node] + '</li>');
@@ -311,41 +378,44 @@ $(document).ready(function () {
             }
         }
 
-        processNodes();
 
-
+        if (alg) {
+            processPaint();
+        } else {
+            processNodes();
+        }
 
         $('.result_calculate_none').slideUp();
         $('.result_calculate_colors_list').slideDown();
         $('.result_calculate_colors li').remove();
         for (var i = 0; i < colorsStorage.length; i++) {
-            $('.result_calculate_colors').append('<li><span class="js-color-update" data-color="' + i +'">' + i + '</span></li>');
+            $('.result_calculate_colors').append('<li><span class="js-color-update" data-color="' + i + '">' + i + '</span></li>');
         }
         $('.result_calculate_colors_count').text(colorsStorage.length);
 
-        $(".area_graph .node").each(function (index, element) {
-            var number = $(this).data('number');
-            $(this).css({fill: color(colorsLinks[number])});
-        });
-
-        $(".js-color-update").each(function (index, element) {
-            var colorId = $(this).data('color');
-            $(this).css({background: color(colorId)});
-        });
+        updateAllColors();
     }
-
-
 
 
     /**
      * Реакция на кнопку "сгенерировать граф"
      */
     $(document).on('submit', 'form.form-generate-graph', function (e) {
+        alg = parseInt($("#algo_generate option:selected").val());
+        $('.step-color').slideUp();
+        stepColor = parseInt($("#color_step option:selected").val());
+        stepColorCount = 0;
         generateGraph();
         $(this).find('button').removeClass('btn-primary').addClass('btn-success');
         e.preventDefault();
     });
 
+    $(document).on('click', '.step-color a', function (e) {
+        e.preventDefault();
+        stepColorCount++;
+        processPaint();
+        updateAllColors();
+    });
     /**
      * Реакция на кнопку "сгенерировать вершины"
      */
@@ -360,7 +430,7 @@ $(document).ready(function () {
             $('.form-generate-graph button').removeAttr('disabled');
         } else {
             var errorInfo = '<div class="alert alert-danger" role="alert">Количество должно быть от 0 до 20</div>';
-            $(this).find('.form-group').after(errorInfo);
+            $(this).find('.form-generate-nodes-count').after(errorInfo);
         }
         e.preventDefault();
     });
