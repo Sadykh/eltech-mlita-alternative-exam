@@ -311,13 +311,13 @@ $(document).ready(function () {
         for (var i in links) {
             sortList.push([i, links[i].length]);
         }
-        //sortList.sort(function (a, b) {
-        //    if (a[1] < b[1])
-        //        return 1;
-        //    if (a[1] > b[1])
-        //        return -1;
-        //    return 0;
-        //});
+        sortList.sort(function (a, b) {
+            if (a[1] < b[1])
+                return 1;
+            if (a[1] > b[1])
+                return -1;
+            return 0;
+        });
 
         // Вывод отсортированного списка
         $('.logs_graph .empty_log').slideUp();
